@@ -21,6 +21,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 9090
     networks:
@@ -43,6 +45,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 9093
     networks:
@@ -67,6 +71,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 9100
     networks:
@@ -92,6 +98,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 8080
     networks:
@@ -114,6 +122,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 3000
     networks:
@@ -148,6 +158,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 9080
     networks:
@@ -163,6 +175,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     expose:
       - 9091
     networks:
@@ -183,6 +197,8 @@ services:
       - loki
     logging:
       driver: loki
+      options:
+        loki-url: "http://loki:3100/api/prom/push"
     ports:
       - "3000:3000"
       - "3100:3100"
