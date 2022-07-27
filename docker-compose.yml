@@ -1,0 +1,206 @@
+version: '3'
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.37.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost:9090'
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 9090
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+      - alertmanager_data:/data
+    command:
+      - '--storage.path=/data'
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--web.external-url=http://localhost:9093'
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 9093
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  nodeexporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 9100
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.44.0
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:rw
+      - /var/lib/docker:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
+      - /dev/disk/:/dev/disk:ro
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 8080
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  grafana:
+    image: grafana/grafana:9.0.4
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 3000
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  loki:
+    image: grafana/loki:2.6.1
+    container_name: loki
+    volumes:
+      - loki_data:/data/loki
+      - ./loki/loki_config.yml:/etc/loki/local-config.yaml:ro
+      - ./loki/loki_alerts.yml:/etc/loki/rules/alerts/rules.yml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    expose:
+      - 3100
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  promtail:
+    image: grafana/promtail:2.6.1
+    container_name: promtail
+    volumes:
+      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 9080
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  pushgateway:
+    image: prom/pushgateway:v1.4.3
+    container_name: pushgateway
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    expose:
+      - 9091
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+  caddy:
+    image: caddy:2.5.2
+    container_name: caddy
+    volumes:
+      - ./caddy:/etc/caddy
+    environment:
+      - ADMIN_USER=${USER}
+      - ADMIN_PASSWORD=${PASSWORD}
+    restart: unless-stopped
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+    ports:
+      - "3000:3000"
+      - "3100:3100"
+      - "9080:9080"
+      - "9090:9090"
+      - "9093:9093"
+      - "9091:9091"
+    networks:
+      - monitor-br
+    labels:
+      com.example.description: "monitoring"
+
+networks:
+  monitor-br:
+    driver: bridge
+
+volumes:
+    alertmanager_data: {}
+    prometheus_data: {}
+    grafana_data: {}
+    loki_data: {}
