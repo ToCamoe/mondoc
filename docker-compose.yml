@@ -26,7 +26,7 @@ services:
     expose:
       - 9090
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -50,7 +50,7 @@ services:
     expose:
       - 9093
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -76,7 +76,7 @@ services:
     expose:
       - 9100
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -103,7 +103,7 @@ services:
     expose:
       - 8080
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -127,7 +127,7 @@ services:
     expose:
       - 3000
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -136,14 +136,15 @@ services:
     container_name: loki
     volumes:
       - loki_data:/data/loki
-      - ./loki/loki_config.yml:/etc/loki/local-config.yaml:ro
+      - ./loki/loki_config.yml:/etc/loki/local-config.yml:ro
       - ./loki/loki_alerts.yml:/etc/loki/rules/alerts/rules.yml:ro
-    command: -config.file=/etc/loki/local-config.yaml
+    command: 
+      - '-config.file=/etc/loki/local-config.yml'
     restart: unless-stopped
     expose:
       - 3100
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -151,9 +152,10 @@ services:
     image: grafana/promtail:2.6.1
     container_name: promtail
     volumes:
-      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ./promtail/config.yml:/etc/promtail/config.yml
       - /var/log:/var/log
-    command: -config.file=/etc/promtail/promtail-config.yaml
+    command: 
+      - '-config.file=/etc/promtail/config.yml'
     depends_on:
       - loki
     logging:
@@ -163,7 +165,7 @@ services:
     expose:
       - 9080
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -180,7 +182,7 @@ services:
     expose:
       - 9091
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
@@ -207,12 +209,12 @@ services:
       - "9093:9093"
       - "9091:9091"
     networks:
-      - monitor-br
+      - monitor
     labels:
       com.example.description: "monitoring"
 
 networks:
-  monitor-br:
+  monitor:
     driver: bridge
 
 volumes:
