@@ -1,20 +1,20 @@
 :9090 {
     basicauth /* {
-        {$USER} {$PASSWORD}
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
     }
     reverse_proxy prometheus:9090
 }
 
 :9093 {
     basicauth /* {
-        {$USER} {$PASSWORD}
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
     }
     reverse_proxy alertmanager:9093
 }
 
 :9091 {
     basicauth /* {
-        {$USER} {$PASSWORD}
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
     }
     
     reverse_proxy pushgateway:9091

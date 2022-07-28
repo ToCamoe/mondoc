@@ -91,8 +91,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
-      - GF_SECURITY_ADMIN_USER=${USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
     expose:
@@ -158,8 +158,9 @@ services:
     volumes:
       - ./caddy:/etc/caddy
     environment:
-      - ADMIN_USER=${USER}
-      - ADMIN_PASSWORD=${PASSWORD}
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-JDJhJDE0JFk5dy5QakYvQTB0WWxmVld1eWJ0Ri5NUk1WaXlKdTl0UDNTREFpWEVsdkwwN28xb3pwYW4y}
     restart: unless-stopped
     ports:
       - "3000:3000"
