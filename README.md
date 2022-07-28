@@ -16,12 +16,6 @@ Monitoring in Docker with compose
 
 ## Install
 
-### Change .env:
-```
-USER=admin  
-PASSWORD=admin
-```
-
 ### Loki - Docker Driver Client
 
 By default the parameter is enabled in the docker compose file, but to make it work you need to install the driver and make changes in the docker.
@@ -58,8 +52,12 @@ A complete list of integrations can be found [here](https://prometheus.io/docs/a
 The [pushgateway](https://github.com/prometheus/pushgateway) is used to collect data from batch jobs or from services. [Examples](https://github.com/prometheus/pushgateway#command-line)
 
 ## Run
+```
+docker run --rm caddy caddy hash-password --plaintext '<your_passwrod>'
+```
 
 ```
+ADMIN_USER=<your_user> ADMIN_PASSWORD=<your_passwrod> ADMIN_PASSWORD_HASH=<your_passwrod_hash> do
 docker compose up -d
 ```
 * The appearance of the start command depends on the variation of the docker compose installation
