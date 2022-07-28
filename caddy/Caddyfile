@@ -28,6 +28,6 @@
     reverse_proxy loki:3100
 }
 
-:2019 {
+:2018 {
     metrics
 }
