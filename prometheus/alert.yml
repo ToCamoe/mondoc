@@ -1,14 +1,25 @@
 groups:
-- name: Targets
+- name: AllInstances
   rules:
-  - alert: monitor_service_down
-    expr: up == 0
-    for: 30s
-    labels:
-      severity: critical
-    annotations:
-      summary: "Monitor service non-operational"
-      description: "Service {{ $labels.instance }} is down."
+    - alert: InstanceDown
+      expr: up == 0
+      for: 1m
+      annotations:
+        title: "Instance {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+      labels:
+        severity: "critical"
+
+- name: Service
+  rules:
+    - alert: "Service"
+      expr: 'absent(container_tasks_state{state="running",name="my-service"})'
+      for: 1m
+      annotations:
+        title: "Container {{ $labels.name }} down"
+        description: "{{ $labels.name }} has been down for more than 1 minute."
+      labels:
+        severity: "critical"
 
 - name: NodeExporter
   rules:
